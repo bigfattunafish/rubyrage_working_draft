@@ -10,12 +10,12 @@
 
   <div id="rubymon-set">
     <img class="rubymon-img" id="blank">
-    <img src='images/rubymon3d_red.png' class="rubymon-img" id="red" width="50px" height="40px">
-    <img src='images/rubymon3d_blue.png' class="rubymon-img" id="blue" width="50px" height="40px">
-    <img src='images/rubymon3d_green.png' class="rubymon-img" id="green" width="50px" height="40px">
-    <img src='images/rubymon3d_purple.png' class="rubymon-img" id="purple" width="50px" height="40px">
-    <img src='images/rubymon3d_yellow.png' class="rubymon-img" id="yellow" width="50px" height="40px">
-    <img src='images/rubymon_sad.png' class="rubymon-img sad" id="sad" width="50px" height="40px">
+    <img src='images/rubymon3d_red.png' class="rubymon-img" id="red">
+    <img src='images/rubymon3d_blue.png' class="rubymon-img" id="blue">
+    <img src='images/rubymon3d_green.png' class="rubymon-img" id="green">
+    <img src='images/rubymon3d_purple.png' class="rubymon-img" id="purple">
+    <img src='images/rubymon3d_yellow.png' class="rubymon-img" id="yellow">
+    <img src='images/rubymon3d_sad.png' class="rubymon-img" id="sad">
   </div>
 
   <h1>Ruby Rage Draft</h1>
@@ -24,8 +24,6 @@
   <canvas width='30' height='60' id="preview"></canvas> <!-- TODO: NEED TO MAKE IT RESPONSIVE -->
 
   <script>
-  // PART X: Helpers  ------------------------------------
-
 
   // PART 1: SET UP GLOBAL VARIABLES THAT ARE CONSTANT ------------------------------------
 
@@ -59,8 +57,8 @@
     var gameboardInplay = [[ 0, 0, 0, 0, 0, 0], // Top Row
                            [ 0, 0, 0, 0, 0, 0],
                            [ 0, 0, 0, 0, 0, 0],
-                           [ 0, 0, 2, 0, 0, 0],
-                           [ 0, 0, 1, 0, 0, 0],
+                           [ 5, 0, 2, 0, 0, 0],
+                           [ 6, 0, 1, 0, 0, 0],
                            [ 0, 0, 0, 0, 0, 0],
                            [ 0, 0, 0, 0, 0, 0],
                            [ 0, 0, 0, 3, 0, 0],
@@ -68,12 +66,14 @@
                            [ 0, 0, 0, 0, 4, 0],
                            [ 0, 0, 0, 0, 0, 5],
                            [ 0, 0, 0, 0, 0, 0]] // Bottom Row, 12  rows total
+  // PART 3: INITIALIZE GAME ------------------------------------
+
+
 
   // PART 2: RUBYRAGE LOGIC SETUP ------------------------------------
 
 
 
-  // PART 3: GAME SETUP ------------------------------------
 
 
   // PART 4: GAME RENDER ------------------------------------
@@ -81,12 +81,11 @@
     // 4.1:
     var BLOCK_W = gameboardWitdh / gameboardColumns;
     var BLOCK_H = gameboardHeight / gameboardRows;
+
     var colorSet = $('.rubymon-img');
-
     function selectRubymonToShow(colorIndex) { return colorSet[colorIndex]; };
-
     function showRubymon(img, xPosition, yPosition) {
-      ctxGameboard.drawImage( img, BLOCK_W * xPosition, BLOCK_H * yPosition);
+      ctxGameboard.drawImage( img, 0, 0, 140, 126, BLOCK_W * xPosition, BLOCK_H * yPosition, 50, 40);
     }
 
     ctxGameboard.fillStyle = 'lightgrey';
@@ -101,7 +100,6 @@
         }
       }
     }
-
     setInterval( render, 30 );
 
   </script>
