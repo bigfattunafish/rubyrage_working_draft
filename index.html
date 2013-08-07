@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RubyRage Draft</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore-min.js"></script>
+</head>
+<body>
+
+  <div id="rubymon-set">
+    <img class="rubymon-img" id="blank">
+    <img src='images/rubymon3d_red.png' class="rubymon-img" id="red" width="50px" height="40px">
+    <img src='images/rubymon3d_blue.png' class="rubymon-img" id="blue" width="50px" height="40px">
+    <img src='images/rubymon3d_green.png' class="rubymon-img" id="green" width="50px" height="40px">
+    <img src='images/rubymon3d_purple.png' class="rubymon-img" id="purple" width="50px" height="40px">
+    <img src='images/rubymon3d_yellow.png' class="rubymon-img" id="yellow" width="50px" height="40px">
+    <img src='images/rubymon_sad.png' class="rubymon-img sad" id="sad" width="50px" height="40px">
+  </div>
+
+  <h1>Ruby Rage Draft</h1>
+
+  <canvas width='300' height='480' id="gameboard"></canvas> <!-- TODO: NEED TO MAKE IT RESPONSIVE -->
+  <canvas width='30' height='60' id="preview"></canvas> <!-- TODO: NEED TO MAKE IT RESPONSIVE -->
+
+  <script>
+  // PART X: Helpers  ------------------------------------
+
+
+  // PART 1: SET UP GLOBAL VARIABLES THAT ARE CONSTANT ------------------------------------
+
+    // Specific for game environment
+    var gameboardColumns = 6
+    var gameboardRows = 12
+
+    // Specific for rendering (Only used in Part 4)
+    var gameboard = $('#gameboard')[0];
+    var gameboardWitdh = 300;
+    var gameboardHeight = 480; // TODO: NEED TO MAKE THE WIDTH RESPONSIVE
+
+    var preview = $('#preview')[0];
+    var ctxGameboard = gameboard.getContext( '2d' );
+    var ctxPreview = preview.getContext( '2d' );
+
+  // PART 2: SET UP GLOBAL VARIABLES THAT ARE REFRESHABLE ----------------------------------
+    var gameboardInit = [[0, 0, 0, 0, 0, 0], // Top Row
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0]] // Bottom Row, 12  rows total
+
+    var gameboardInplay = [[ 0, 0, 0, 0, 0, 0], // Top Row
+                           [ 0, 0, 0, 0, 0, 0],
+                           [ 0, 0, 0, 0, 0, 0],
+                           [ 0, 0, 2, 0, 0, 0],
+                           [ 0, 0, 1, 0, 0, 0],
+                           [ 0, 0, 0, 0, 0, 0],
+                           [ 0, 0, 0, 0, 0, 0],
+                           [ 0, 0, 0, 3, 0, 0],
+                           [ 0, 0, 0, 0, 0, 0],
+                           [ 0, 0, 0, 0, 4, 0],
+                           [ 0, 0, 0, 0, 0, 5],
+                           [ 0, 0, 0, 0, 0, 0]] // Bottom Row, 12  rows total
+
+  // PART 2: RUBYRAGE LOGIC SETUP ------------------------------------
+
+
+
+  // PART 3: GAME SETUP ------------------------------------
+
+
+  // PART 4: GAME RENDER ------------------------------------
+
+    // 4.1:
+    var BLOCK_W = gameboardWitdh / gameboardColumns;
+    var BLOCK_H = gameboardHeight / gameboardRows;
+    var colorSet = $('.rubymon-img');
+
+    function selectRubymonToShow(colorIndex) { return colorSet[colorIndex]; };
+
+    function showRubymon(img, xPosition, yPosition) {
+      ctxGameboard.drawImage( img, BLOCK_W * xPosition, BLOCK_H * yPosition);
+    }
+
+    ctxGameboard.fillStyle = 'lightgrey';
+    ctxGameboard.fillRect( 0, 0, gameboardWitdh, gameboardHeight );
+    ctxGameboard.font = "bold 20pt Sans-Serif";
+
+    function render() {
+      for ( var x = 0; x < gameboardColumns; ++x ) {
+        for ( var y = 0; y < gameboardRows ; ++y ) {
+          var selectedRubymon = selectRubymonToShow(gameboardInplay[ y ][ x ]);
+          showRubymon(selectedRubymon, x, y);
+        }
+      }
+    }
+
+    setInterval( render, 30 );
+
+  </script>
+</body>
+</html>
+
