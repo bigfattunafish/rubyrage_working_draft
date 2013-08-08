@@ -57,13 +57,15 @@
     var anotherY = 0;
     // var puyoGroup = [];
     // var score = 0;
-    var current;
+    var currentRubyBox;
     var currentX, currentY;
     var newX, newY;
     var lostStatus;
     var interval;
     var tickSpeed = 450
     var rensaInterval;
+
+    var gameboardInplay;
     var gameboardInit = [[0, 0, 0, 0, 0, 0], // Top Row
                          [0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0],
@@ -76,7 +78,6 @@
                          [0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0]]; // Bottom Row, 12  rows total
-    var gameboardInplay;
 
     var rubymonPairsPreset = [];
     var currentRubymonIndex = 0;
@@ -85,38 +86,40 @@
   // PART 3: INITIALIZE GAME
   //////////////////////////////////////////////////////////////////////////////
 
-    function prepareRubymonPreset(){
-      var colorTrays = [60, 60, 60, 60, 60];
-
+    function prepareEmptyPreset() {
       for ( var i = 0; i < 150; i++ ) {
         rubymonPairsPreset[i] = [0, 0];
       }
+    }
 
-      for (var i = 0; i < 300; i) {
-        var cur = (Math.ceil(Math.random()*colorTrays.length))%colorTrays.length;
-        if ( colorTrays[cur] > 0 ) {
-          colorTrays[cur]--;
-          rubymonPairsPreset[i%150][Math.floor(i/150)]=colors[cur];
-          i++;
+    function prepareRubymonPreset() {
+      prepareEmptyPreset();
+      var colorTrays = [60, 60, 60, 60, 60];
+      for (var i = 0; i < 300; i++) {
+        var randomIndex = _.random(0, colorTrays.length - 1);
+        if ( colorTrays[randomIndex] > 0) {
+          rubymonPairsPreset[i % 150][Math.floor(i / 150)] = colors[randomIndex];
+          colorTrays[randomIndex]--;
         }
       }
     }
 
     function deployNewRubymonPair() {
-      var col = rubymonPairsPreset[currentRubymonIndex];
-      current = [[col[0],0],[col[1],0]];
+      var currentRubyPair = rubymonPairsPreset[currentRubymonIndex];
+      currentRubyBox = [[currentRubyPair[0],0],
+                        [currentRubyPair[1],0]];
       currentX = 2;
       currentY = 1;
       currentRubymonIndex  = ( currentRubymonIndex + 1 ) % rubymonPairsPreset.length;
     }
 
-    function prepareBlankGameboard() {
+    function prepareBlankGameboardArray() {
         gameboardInplay = gameboardInit;
     }
 
     function newGame() {
       clearInterval(interval);
-      prepareBlankGameboard();
+      prepareBlankGameboardArray();
       prepareRubymonPreset();
       deployNewRubymonPair();
       lostStatus = false;
@@ -152,36 +155,36 @@
         for ( var x = 0; x < 2; ++x ) {
           if ( (y + currentY) >= (gameboardRows - 1)  ||
              gameboardInplay[ y + 1 +currentY][ x + currentX ] != 0){
-            if ( current[ y ][ x ] ) {
-                gameboardInplay[ y + currentY ][ x + currentX ] = current[ y ][ x ];
-                current[y][x] = 0;
+            if ( currentRubyBox[ y ][ x ] ) {
+                gameboardInplay[ y + currentY ][ x + currentX ] = currentRubyBox[ y ][ x ];
+                currentRubyBox[y][x] = 0;
             }
           }
         }
       }
 
       for ( var y = 1; 0 <= y; --y ) {
-          for ( var x = 0; x < 2; ++x ) {
-              if( current[y][x] ){
-                  return true;
-              }
+        for ( var x = 0; x < 2; ++x ) {
+          if( currentRubyBox[y][x] ){
+              return true;
           }
+        }
       }
 
       return false;
     }
 
-    function rotate( current ) {
-      newX =0;
-      newY =0;
-      if (current[0][0] != 0 ){
-        if ( current[0][1] != 0 ){  //  **
+    function rotate( currentRubyBox ) {
+      newX = 0;
+      newY = 0;
+      if (currentRubyBox[0][0] != 0 ){
+        if ( currentRubyBox[0][1] != 0 ){  //  **
             newX = - 1;
                          //  --
           if(currentY == 13 || gameboardInplay[currentY+1][currentX] != 0 ) {
             newY--;
           }
-        }else if ( current[1][0] != 0){  //  *-
+        }else if ( currentRubyBox[1][0] != 0){  //  *-
             newY = 1;                    //  *-
           if(currentX == 5){
             newX--;
@@ -190,14 +193,14 @@
           }
         }
 
-      }else if ( current[1][1] != 0 ){
-        if ( current[0][1] != 0 ){  //  --
+      } else if ( currentRubyBox[1][1] != 0 ){
+        if ( currentRubyBox[0][1] != 0 ){  //  --
             newY = -1;              //  **
             if ( currentX == -1 ) {
               newX++;
               newY++;
             }
-        } else if ( current[1][0] != 0){ //  -*
+        } else if ( currentRubyBox[1][0] != 0){ //  -*
             newX = 1;                   //  -*
         }
       }
@@ -206,7 +209,7 @@
       for ( var y = 0; y < 2; ++y ) {
         newCurrent[ y ] = [];
         for ( var x = 0; x < 2; ++x ) {
-            newCurrent[ y ][ x ] = current[ 1 - x ][ y ];
+            newCurrent[ y ][ x ] = currentRubyBox[ 1 - x ][ y ];
         }
       }
 
@@ -227,21 +230,21 @@
       var is_erased;
       is_erased = false;
       for ( var y = 0; y < gameboardRows; ++y ) {
-          for ( var x = 0; x < gameboardColumns; ++x ) {
-              if ( gameboardInplay[y][x] != 0) {
-                  if ( clearPuyo(x,y) ) {
-                      is_erased = true;
-                  }
-              }
+        for ( var x = 0; x < gameboardColumns; ++x ) {
+          if ( gameboardInplay[y][x] != 0) {
+            if ( clearPuyo(x,y) ) {
+                is_erased = true;
+            }
           }
+        }
       }
 
       if (is_erased){
           if (interval != 0) {
-              clearInterval(interval);
-              interval = 0;
-              inputFlag = false;
-              rensaInterval = setInterval(clear,500);
+            clearInterval(interval);
+            interval = 0;
+            inputFlag = false;
+            rensaInterval = setInterval(clear,500);
           }
           packPuyos();
           rensaCount++;
@@ -362,12 +365,12 @@
 
       switch ( key ) {
       case 'left':
-        if ( valid( -1 ) && puyoSize() > 1  ) {
+        if ( valid( -1, 0 ) && puyoSize() > 1  ) {
             --currentX;
         }
         break;
       case 'right':
-        if ( valid( 1 ) && puyoSize() > 1  ) {
+        if ( valid( 1, 0 ) && puyoSize() > 1  ) {
             ++currentX;
         }
         break;
@@ -377,16 +380,16 @@
         }
         break;
       case 'rotate':
-        var rotated = rotate( current );
+        var rotated = rotate( currentRubyBox );
         //        f0001( rotated );
         if ( valid( newX, newY, rotated ) ) {
-            current = rotated;
+            currentRubyBox = rotated;
             currentX = currentX + newX
             currentY = currentY + newY
-        }else if ( valid( newX + anotherX, newY + anotherY, rotated ) ) {
-          current = rotated;
-            currentX = currentX + newX + anotherX
-            currentY = currentY + newY + anotherY;
+        } else if ( valid( newX + anotherX, newY + anotherY, rotated ) ) {
+          currentRubyBox = rotated;
+          currentX = currentX + newX + anotherX
+          currentY = currentY + newY + anotherY;
         }
         break;
       case 'pauseScreen':
@@ -401,35 +404,31 @@
           39: 'right',
           40: 'down',
           38: 'rotate',
-          // 88: 'rotate',
-          // 90: 'leftRotate',
           13: 'pauseScreen'
       };
       if ( typeof keys[ e.keyCode ] != 'undefined' ) {
           keyPress( keys[ e.keyCode ] );
-          renderAll();
+          // renderAll();
       }
     };
 
     function valid( offsetX, offsetY, newCurrent ) {
-      offsetX = offsetX || 0;
-      offsetY = offsetY || 0;
       offsetX = currentX + offsetX;
       offsetY = currentY + offsetY;
-      newCurrent = newCurrent || current;
+      newCurrent = newCurrent || currentRubyBox;
 
       for ( var y = 0; y < 2; ++y ) {
         for ( var x = 0; x < 2; ++x ) {
           if ( newCurrent[ y ][ x ] ) {
             if ( typeof gameboardInplay[ y + offsetY ] == 'undefined'
-                 || typeof gameboardInplay[ y + offsetY ][ x + offsetX ] == 'undefined'
-                 || gameboardInplay[ y + offsetY ][ x + offsetX ]
-                 || x + offsetX < 0
-                 || y + offsetY >= gameboardRows
-                 || x + offsetX >= gameboardColumns ) {
-                if (offsetY == 3 && offsetX == 2) lostStatus = true;
-                if (offsetY == 2 && offsetX == 2) lostStatus = true;
-                return false;
+               || typeof gameboardInplay[ y + offsetY ][ x + offsetX ] == 'undefined'
+               || gameboardInplay[ y + offsetY ][ x + offsetX ]
+               || x + offsetX < 0
+               || y + offsetY >= gameboardRows
+               || x + offsetX >= gameboardColumns ) {
+              if (offsetY == 3 && offsetX == 2) lostStatus = true;
+              if (offsetY == 2 && offsetX == 2) lostStatus = true;
+              return false;
             }
           }
         }
@@ -441,7 +440,7 @@
       var z = 0;
       for ( var y = 1; 0 <= y; --y ) {
         for ( var x = 0; x < 2; ++x ) {
-          if ( current[ x ][ y ] != 0 ) {
+          if ( currentRubyBox[ x ][ y ] != 0 ) {
             z++;
           }
         }
@@ -474,7 +473,7 @@
     function renderFallingRubymons() {
       for ( var y = 0; y < 2; y++ ) {
         for ( var x = 0; x < 2; x++ ) {
-          var selectedRubymon = selectRubymon(current[ y ][ x ]);
+          var selectedRubymon = selectRubymon(currentRubyBox[ y ][ x ]);
           showRubymon(ctxGameboard, selectedRubymon, currentX + x, currentY + y);
           // debugger;
         }
